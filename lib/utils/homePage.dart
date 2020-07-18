@@ -2,9 +2,6 @@ import 'package:fitnessapp/utils/allcount.dart';
 import 'package:fitnessapp/utils/maps.dart';
 import 'package:flutter/material.dart';
 
-import 'helpScreen.dart';
-import 'mainScreen.dart';
-
 class HomePage extends StatefulWidget {
   String phoneNo;
   HomePage({this.phoneNo});
@@ -29,11 +26,9 @@ class _HomePageState extends State<HomePage> {
     print("homepage");
     print(widget.phoneNo);
     List<Widget> _widgetOptions = <Widget>[
-      MainScreen(),
       Maps(
         phoneNo: widget.phoneNo,
       ),
-      HelpScreen(),
       AllCountries()
     ];
 
@@ -41,7 +36,7 @@ class _HomePageState extends State<HomePage> {
         child: Scaffold(
             appBar: new AppBar(
               title: Text(
-                "Topic",
+                "Safe Route",
                 style: TextStyle(color: Colors.black),
               ),
               centerTitle: true,
@@ -68,16 +63,8 @@ class _HomePageState extends State<HomePage> {
       child: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            title: Text('Home'),
-          ),
-          BottomNavigationBarItem(
             icon: Icon(Icons.map),
             title: Text('Your Route'),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.phone),
-            title: Text('Help'),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.insert_chart),

@@ -1,11 +1,10 @@
+import 'dart:async';
 import 'dart:collection';
-import 'dart:math';
-
-import 'package:fitnessapp/utils/secrets.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
 
 class Maps extends StatefulWidget {
   String phoneNo;
@@ -15,6 +14,14 @@ class Maps extends StatefulWidget {
 }
 
 class _MapsState extends State<Maps> {
+  Timer _timer;
+  _MapsState() {
+    _timer = new Timer(const Duration(seconds: 4), () {
+      setState(() {
+        _setCircles();
+      });
+    });
+  }
   CameraPosition _initialLocation = CameraPosition(target: LatLng(0.0, 0.0));
   final Geolocator _geolocator = Geolocator();
   Position _currentPosition;
@@ -26,17 +33,34 @@ class _MapsState extends State<Maps> {
 
   GoogleMapController _mapController;
   BitmapDescriptor _markerIcon;
+
+  Map data;
+  List circleData;
+  List _tempList = [];
+
+  void getData() async {
+    http.Response response =
+        await http.get('https://bref-croissant-48789.herokuapp.com/getall');
+    if (response.statusCode == 200) {
+      List parsedJson = json.decode(response.body);
+      for (var res in parsedJson) {
+        print(res['centerx']);
+        _tempList.add(res);
+        print(_tempList);
+      }
+    } else {
+      throw Exception('Failed to get all countries names');
+    }
+  }
+
   _getCurrentLocation() async {
     await _geolocator
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.high)
         .then((Position position) async {
       setState(() {
-        // Store the position in the variable
         _currentPosition = position;
 
         print('CURRENT POS: $_currentPosition');
-
-        // For moving the camera to current location
         _mapController.animateCamera(
           CameraUpdate.newCameraPosition(
             CameraPosition(
@@ -58,7 +82,7 @@ class _MapsState extends State<Maps> {
     // _setMarkerIcon();
     // _setPolygons();
     // _setPolylines();
-    _setCircles();
+    getData();
   }
 
   // void _setMarkerIcon() async {
@@ -110,16 +134,41 @@ class _MapsState extends State<Maps> {
   //     ),
   //   );
   // }
-
   void _setCircles() {
+    print("hello");
     _circles.add(
       Circle(
-          circleId: CircleId("0"),
+          circleId: CircleId('0'),
           center: LatLng(29.4698326, 77.7139136),
           radius: 1000,
           strokeWidth: 2,
           fillColor: Color.fromRGBO(102, 51, 153, .5)),
     );
+
+    _circles.add(
+      Circle(
+          circleId: CircleId('1'),
+          center: LatLng(29.4143554039, 77.7384911384),
+          radius: 1000,
+          strokeWidth: 2,
+          fillColor: Color.fromRGBO(102, 51, 153, .5)),
+    );
+    int _counter = 2;
+    for (var res in _tempList) {
+      print(res['centerx']);
+      _circles.add(
+        Circle(
+            circleId: CircleId(_counter.toString()),
+            center: LatLng(res['centerx'], res['centery']),
+            radius: 1000,
+            strokeWidth: 2,
+            fillColor: Color.fromRGBO(102, 51, 153, .5)),
+      );
+      _counter++;
+
+      print(_circles);
+    }
+    print('Helo');
   }
 
   void _onMapCreated(GoogleMapController controller) {
